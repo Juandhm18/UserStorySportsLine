@@ -1,0 +1,54 @@
+
+
+services:
+  backend:
+    build: .
+    container_name: sportsline_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=localhost
+      - DB_USER=postgres
+      - DB_PASSWORD=Qwe.123*
+      - DB_NAME=sportsline_db
+      - DB_PORT=5432
+      - NODE_ENV=development
+    depends_on:
+      - db
+    networks:
+      - sportsline_net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  db:
+    image: postgres:16-alpine
+    container_name: sportsline_db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sportsline_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - sportsline_net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: 256M
+
+networks:
+  sportsline_net:
+
+volumes:
+  db_data:
