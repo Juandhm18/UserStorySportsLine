@@ -1,13 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database";
 
-class User extends Model {
-    public id!: number;
-    public name!: string;
-    public email!: string;
-    public password!: string;
-    public rol!: string;
-}
+class User extends Model {}
 
 User.init({
     id: {
@@ -29,8 +23,9 @@ User.init({
         allowNull: false
     },
     rol: {
-        type: DataTypes.STRING,
-        defaultValue: 'user'
+        type: DataTypes.ENUM('admin', 'vendedor'),
+        defaultValue: 'vendedor',
+        allowNull: false
     },
 },{
     sequelize,

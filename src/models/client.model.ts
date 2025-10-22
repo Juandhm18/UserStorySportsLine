@@ -6,6 +6,8 @@ class Client extends Model {
   public name!: string;
   public email!: string;
   public phone!: string;
+  public address!: string;
+  public document!: string;
 }
 
 Client.init(
@@ -27,6 +29,15 @@ Client.init(
     phone: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    document: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
     },
   },
   {

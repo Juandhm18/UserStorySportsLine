@@ -1,10 +1,23 @@
 import express from 'express';
 import sequelize from './config/database';
+import authRoutes from './routes/auth.routes';
+import productRoutes from './routes/product.routes';
+import clientRoutes from './routes/client.routes';
+import orderRoutes from './routes/order.routes';
+
+// Importar asociaciones después de configurar Sequelize
+import './models/associations';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// Rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (_req, res) => {
     res.send(`Servidor corriendo con exito`);
