@@ -36,7 +36,9 @@ OrderItem.init(
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      min: 1
+      validate: {
+        min: 1
+      }
     },
     unitPrice: {
       type: DataTypes.DECIMAL(10, 2),

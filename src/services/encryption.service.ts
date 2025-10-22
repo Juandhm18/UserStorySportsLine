@@ -35,7 +35,7 @@ class EncryptionService {
 
     // Cifrar con AES-256-GCM
     private encryptAES(data: string, key: Buffer, iv: Buffer): string {
-        const cipher = crypto.createCipher('aes-256-gcm', key);
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
         cipher.setAAD(Buffer.from('sportsline-app', 'utf8'));
         
         let encrypted = cipher.update(data, 'utf8', 'hex');
@@ -48,13 +48,13 @@ class EncryptionService {
     // Descifrar con AES-256-GCM
     private decryptAES(encryptedData: string, key: Buffer, iv: Buffer): string {
         const [encrypted, authTagHex] = encryptedData.split(':');
-        const authTag = Buffer.from(authTagHex, 'hex');
+        const authTag = Buffer.from(authTagHex || '', 'hex');
         
-        const decipher = crypto.createDecipher('aes-256-gcm', key);
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
         decipher.setAAD(Buffer.from('sportsline-app', 'utf8'));
         decipher.setAuthTag(authTag);
         
-        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+        let decrypted = decipher.update(encrypted || '', 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         
         return decrypted;

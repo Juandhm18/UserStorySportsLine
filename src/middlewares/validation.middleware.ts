@@ -14,7 +14,7 @@ export const validateDTO = (schema: z.ZodSchema) => {
             next();
         } catch (error) {
             if (error instanceof z.ZodError) {
-                const errorMessages = error.errors.map(err => ({
+                const errorMessages = error.issues.map((err: any) => ({
                     field: err.path.join('.'),
                     message: err.message
                 }));
@@ -39,11 +39,11 @@ export const validateQuery = (schema: z.ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             const validatedData = schema.parse(req.query);
-            req.query = validatedData;
+            req.query = validatedData as any;
             next();
         } catch (error) {
             if (error instanceof z.ZodError) {
-                const errorMessages = error.errors.map(err => ({
+                const errorMessages = error.issues.map((err: any) => ({
                     field: err.path.join('.'),
                     message: err.message
                 }));
@@ -68,11 +68,11 @@ export const validateParams = (schema: z.ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             const validatedData = schema.parse(req.params);
-            req.params = validatedData;
+            req.params = validatedData as any;
             next();
         } catch (error) {
             if (error instanceof z.ZodError) {
-                const errorMessages = error.errors.map(err => ({
+                const errorMessages = error.issues.map((err: any) => ({
                     field: err.path.join('.'),
                     message: err.message
                 }));

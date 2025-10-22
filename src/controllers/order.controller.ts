@@ -20,7 +20,7 @@ class OrderController {
             const orderWithUser = {
                 ...orderData,
                 userId
-            };
+            } as any;
 
             const order = await OrderService.create(orderWithUser);
 
@@ -48,7 +48,7 @@ class OrderController {
 
     async getAll(req: Request, res: Response) {
         try {
-            const queryParams = req.query as unknown as OrderQueryDTOType;
+            const queryParams = req.query as any;
             const orders = await OrderService.getAll(queryParams);
             
             res.status(200).json({
@@ -92,7 +92,7 @@ class OrderController {
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params as unknown as OrderParamsDTOType;
-            const orderData: UpdateOrderDTOType = req.body;
+            const orderData: any = req.body;
             
             const order = await OrderService.update(id, orderData);
 
@@ -301,9 +301,9 @@ class OrderController {
             }
 
             const queryParams = {
-                ...req.query as unknown as OrderQueryDTOType,
+                ...req.query as any,
                 userId
-            };
+            } as any;
             
             const orders = await OrderService.getAll(queryParams);
             
