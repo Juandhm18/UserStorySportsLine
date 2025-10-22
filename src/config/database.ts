@@ -15,4 +15,7 @@ const sequelize = new Sequelize(
     }
 );
 
+// Importar asociaciones
+import '../models/associations';
+
 export default sequelize
