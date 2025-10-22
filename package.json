@@ -4,7 +4,9 @@
   "description": "como desarrollador backend tengo la responsabilidad de configurar la base del proyecto con Node.js, Typescript y PostgreSQL para la empresa SportLine y asi garantizar un entorno estandarizado, versionado y listo para futuras integraciones.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js"
   },
   "repository": {
     "type": "git",
