@@ -1,124 +1,101 @@
-import Client from '../models/client.model';
-
-export interface CreateClientData {
-    name: string;
-    email: string;
-    phone?: string | undefined;
-    address?: string | undefined;
-    document: string;
-}
-
-export interface UpdateClientData {
-    name?: string | undefined;
-    email?: string | undefined;
-    phone?: string | undefined;
-    address?: string | undefined;
-    document?: string | undefined;
-}
-
-export interface ClientResponse {
-    id: number;
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-    document: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import ClientDAO, { CreateClientData, UpdateClientData } from '../dao/client.dao';
+import { ClientResponseDTO, ClientListResponseDTO } from '../dto/client.dto';
 
 class ClientService {
-    async getAll(): Promise<ClientResponse[]> {
-        const clients = await Client.findAll();
-        return clients.map(client => this.toResponseDTO(client));
+    async getAll(options?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        sortBy?: string;
+        sortOrder?: 'ASC' | 'DESC';
+    }): Promise<ClientListResponseDTO> {
+        const { page = 1, limit = 10 } = options || {};
+        
+        const result = await ClientDAO.findAll(options);
+        
+        return {
+            clients: ClientDAO.toResponseDTOArray(result.clients),
+            pagination: {
+                page,
+                limit,
+                total: result.total,
+                totalPages: Math.ceil(result.total / limit)
+            }
+        };
     }
 
-    async getById(id: number): Promise<ClientResponse | null> {
-        const client = await Client.findByPk(id);
-        return client ? this.toResponseDTO(client) : null;
+    async getById(id: number): Promise<ClientResponseDTO | null> {
+        const client = await ClientDAO.findById(id);
+        return client ? ClientDAO.toResponseDTO(client) : null;
     }
 
-    async create(data: CreateClientData): Promise<ClientResponse> {
+    async create(data: CreateClientData): Promise<ClientResponseDTO> {
         // Verificar si el email ya existe
-        const existingEmail = await Client.findOne({ where: { email: data.email } });
-        if (existingEmail) {
+        const emailExists = await ClientDAO.existsByEmail(data.email);
+        if (emailExists) {
             throw new Error('El email del cliente debe ser único');
         }
 
         // Verificar si el documento ya existe
-        const existingDocument = await Client.findOne({ where: { document: data.document } });
-        if (existingDocument) {
+        const documentExists = await ClientDAO.existsByDocument(data.document);
+        if (documentExists) {
             throw new Error('El documento del cliente debe ser único');
         }
 
-        const client = await Client.create(data as any);
-        return this.toResponseDTO(client);
+        const client = await ClientDAO.create(data);
+        return ClientDAO.toResponseDTO(client);
     }
 
-    async update(id: number, data: UpdateClientData): Promise<ClientResponse | null> {
+    async update(id: number, data: UpdateClientData): Promise<ClientResponseDTO | null> {
         // Si se está actualizando el email, verificar que no exista
         if (data.email) {
-            const existingEmail = await Client.findOne({ 
-                where: { 
-                    email: data.email,
-                    id: { [require('sequelize').Op.ne]: id }
-                } 
-            });
-            if (existingEmail) {
+            const emailExists = await ClientDAO.existsByEmail(data.email, id);
+            if (emailExists) {
                 throw new Error('El email del cliente debe ser único');
             }
         }
 
         // Si se está actualizando el documento, verificar que no exista
         if (data.document) {
-            const existingDocument = await Client.findOne({ 
-                where: { 
-                    document: data.document,
-                    id: { [require('sequelize').Op.ne]: id }
-                } 
-            });
-            if (existingDocument) {
+            const documentExists = await ClientDAO.existsByDocument(data.document, id);
+            if (documentExists) {
                 throw new Error('El documento del cliente debe ser único');
             }
         }
 
-        const [affectedCount] = await Client.update(data, { where: { id } });
+        const affectedCount = await ClientDAO.update(id, data);
         
         if (affectedCount === 0) {
             return null;
         }
 
-        const updatedClient = await Client.findByPk(id);
-        return updatedClient ? this.toResponseDTO(updatedClient) : null;
+        const updatedClient = await ClientDAO.findById(id);
+        return updatedClient ? ClientDAO.toResponseDTO(updatedClient) : null;
     }
 
     async delete(id: number): Promise<boolean> {
-        const deletedCount = await Client.destroy({ where: { id } });
+        const deletedCount = await ClientDAO.delete(id);
         return deletedCount > 0;
     }
 
-    async findByEmail(email: string): Promise<ClientResponse | null> {
-        const client = await Client.findOne({ where: { email } });
-        return client ? this.toResponseDTO(client) : null;
+    async findByEmail(email: string): Promise<ClientResponseDTO | null> {
+        const client = await ClientDAO.findByEmail(email);
+        return client ? ClientDAO.toResponseDTO(client) : null;
     }
 
-    async findByDocument(document: string): Promise<ClientResponse | null> {
-        const client = await Client.findOne({ where: { document } });
-        return client ? this.toResponseDTO(client) : null;
+    async findByDocument(document: string): Promise<ClientResponseDTO | null> {
+        const client = await ClientDAO.findByDocument(document);
+        return client ? ClientDAO.toResponseDTO(client) : null;
     }
 
-    // Método para convertir Client a ClientResponse
-    private toResponseDTO(client: Client): ClientResponse {
-        return {
-            id: (client as any).id,
-            name: (client as any).name,
-            email: (client as any).email,
-            phone: (client as any).phone,
-            address: (client as any).address,
-            document: (client as any).document,
-            createdAt: (client as any).createdAt,
-            updatedAt: (client as any).updatedAt
-        };
+    async getClientsWithOrders(): Promise<ClientResponseDTO[]> {
+        const clients = await ClientDAO.getClientsWithOrders();
+        return ClientDAO.toResponseDTOArray(clients);
+    }
+
+    async getTopClients(limit: number = 10): Promise<ClientResponseDTO[]> {
+        const clients = await ClientDAO.getTopClients(limit);
+        return ClientDAO.toResponseDTOArray(clients);
     }
 }
 

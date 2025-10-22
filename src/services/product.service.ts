@@ -1,107 +1,88 @@
-import Product from '../models/product.model';
-
-export interface CreateProductData {
-    code: string;
-    name: string;
-    price: number;
-    stock: number;
-}
-
-export interface UpdateProductData {
-    code?: string | undefined;
-    name?: string | undefined;
-    price?: number | undefined;
-    stock?: number | undefined;
-}
-
-export interface ProductResponse {
-    id: number;
-    code: string;
-    name: string;
-    price: number;
-    stock: number;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import ProductDAO, { CreateProductData, UpdateProductData } from '../dao/product.dao';
+import { ProductResponseDTO, ProductListResponseDTO } from '../dto/product.dto';
 
 class ProductService {
-    async getAll(): Promise<ProductResponse[]> {
-        const products = await Product.findAll();
-        return products.map(product => this.toResponseDTO(product));
+    async getAll(options?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        sortBy?: string;
+        sortOrder?: 'ASC' | 'DESC';
+    }): Promise<ProductListResponseDTO> {
+        const { page = 1, limit = 10 } = options || {};
+        
+        const result = await ProductDAO.findAll(options);
+        
+        return {
+            products: ProductDAO.toResponseDTOArray(result.products),
+            pagination: {
+                page,
+                limit,
+                total: result.total,
+                totalPages: Math.ceil(result.total / limit)
+            }
+        };
     }
 
-    async getById(id: number): Promise<ProductResponse | null> {
-        const product = await Product.findByPk(id);
-        return product ? this.toResponseDTO(product) : null;
+    async getById(id: number): Promise<ProductResponseDTO | null> {
+        const product = await ProductDAO.findById(id);
+        return product ? ProductDAO.toResponseDTO(product) : null;
     }
 
-    async create(data: CreateProductData): Promise<ProductResponse> {
+    async create(data: CreateProductData): Promise<ProductResponseDTO> {
         // Verificar si el código ya existe
-        const existingProduct = await Product.findOne({ where: { code: data.code } });
-        if (existingProduct) {
+        const exists = await ProductDAO.existsByCode(data.code);
+        if (exists) {
             throw new Error('El código del producto debe ser único');
         }
 
-        const product = await Product.create(data as any);
-        return this.toResponseDTO(product);
+        const product = await ProductDAO.create(data);
+        return ProductDAO.toResponseDTO(product);
     }
 
-    async update(id: number, data: UpdateProductData): Promise<ProductResponse | null> {
+    async update(id: number, data: UpdateProductData): Promise<ProductResponseDTO | null> {
         // Si se está actualizando el código, verificar que no exista
         if (data.code) {
-            const existingProduct = await Product.findOne({ 
-                where: { 
-                    code: data.code,
-                    id: { [require('sequelize').Op.ne]: id }
-                } 
-            });
-            if (existingProduct) {
+            const exists = await ProductDAO.existsByCode(data.code, id);
+            if (exists) {
                 throw new Error('El código del producto debe ser único');
             }
         }
 
-        const [affectedCount] = await Product.update(data, { where: { id } });
+        const affectedCount = await ProductDAO.update(id, data);
         
         if (affectedCount === 0) {
             return null;
         }
 
-        const updatedProduct = await Product.findByPk(id);
-        return updatedProduct ? this.toResponseDTO(updatedProduct) : null;
+        const updatedProduct = await ProductDAO.findById(id);
+        return updatedProduct ? ProductDAO.toResponseDTO(updatedProduct) : null;
     }
 
     async delete(id: number): Promise<boolean> {
-        const deletedCount = await Product.destroy({ where: { id } });
+        const deletedCount = await ProductDAO.delete(id);
         return deletedCount > 0;
     }
 
-    async findByCode(code: string): Promise<ProductResponse | null> {
-        const product = await Product.findOne({ where: { code } });
-        return product ? this.toResponseDTO(product) : null;
+    async findByCode(code: string): Promise<ProductResponseDTO | null> {
+        const product = await ProductDAO.findByCode(code);
+        return product ? ProductDAO.toResponseDTO(product) : null;
     }
 
-    async updateStock(id: number, newStock: number): Promise<ProductResponse | null> {
-        const [affectedCount] = await Product.update({ stock: newStock }, { where: { id } });
+    async updateStock(id: number, newStock: number): Promise<ProductResponseDTO | null> {
+        const affectedCount = await ProductDAO.updateStock(id, newStock);
         
         if (affectedCount === 0) {
             return null;
         }
 
-        const updatedProduct = await Product.findByPk(id);
-        return updatedProduct ? this.toResponseDTO(updatedProduct) : null;
+        const updatedProduct = await ProductDAO.findById(id);
+        return updatedProduct ? ProductDAO.toResponseDTO(updatedProduct) : null;
     }
 
-    // Método para convertir Product a ProductResponse
-    private toResponseDTO(product: Product): ProductResponse {
-        return {
-            id: (product as any).id,
-            code: (product as any).code,
-            name: (product as any).name,
-            price: (product as any).price,
-            stock: (product as any).stock,
-            createdAt: (product as any).createdAt,
-            updatedAt: (product as any).updatedAt
-        };
+    async getLowStockProducts(threshold: number = 10): Promise<ProductResponseDTO[]> {
+        const products = await ProductDAO.getLowStockProducts(threshold);
+        return ProductDAO.toResponseDTOArray(products);
     }
 }
 
