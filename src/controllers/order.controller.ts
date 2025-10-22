@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import OrderService from '../services/order.service';
-import EncryptionService from '../services/encryption.service';
 import { CreateOrderDTOType, UpdateOrderDTOType, OrderParamsDTOType, OrderQueryDTOType } from '../dto/order.dto';
+import { ResponseUtil } from '../utils/response.util';
+import { MESSAGES } from '../constants/messages';
 
 class OrderController {
     async create(req: Request, res: Response) {
@@ -11,10 +12,7 @@ class OrderController {
             // Agregar el userId del usuario autenticado
             const userId = (req as any).user?.id;
             if (!userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Usuario no autenticado'
-                });
+                return ResponseUtil.unauthorized(res, 'Usuario no autenticado');
             }
 
             const orderWithUser = {
@@ -24,25 +22,15 @@ class OrderController {
 
             const order = await OrderService.create(orderWithUser);
 
-            res.status(201).json({
-                success: true,
-                message: 'Pedido creado exitosamente',
-                data: order
-            });
+            ResponseUtil.created(res, MESSAGES.SUCCESS.ORDER_CREATED, order);
         } catch (error: any) {
             if (error.message.includes('Stock insuficiente') || 
                 error.message.includes('no encontrado') ||
                 error.message.includes('Debe incluir')) {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
+                return ResponseUtil.error(res, error.message, 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al crear pedido: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al crear pedido: ${error.message}`);
         }
     }
 
