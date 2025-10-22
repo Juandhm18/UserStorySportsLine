@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import User from '../models/user.model';
+import JWTService, { TokenPair } from './jwt.service';
 
 export interface RegisterData {
     name: string;
@@ -20,7 +21,7 @@ export interface AuthResponse {
         email: string;
         rol: string;
     };
-    token: string;
+    tokens: TokenPair;
 }
 
 class AuthService {
@@ -45,8 +46,12 @@ class AuthService {
             rol
         });
 
-        // Generar token (por ahora un token simple, se implementará JWT en la siguiente task)
-        const token = `temp_token_${user.id}`;
+        // Generar tokens JWT
+        const tokens = JWTService.generateTokenPair({
+            id: user.id,
+            email: user.email,
+            rol: user.rol
+        });
 
         return {
             user: {
@@ -55,7 +60,7 @@ class AuthService {
                 email: user.email,
                 rol: user.rol
             },
-            token
+            tokens
         };
     }
 
@@ -74,8 +79,12 @@ class AuthService {
             throw new Error('Credenciales inválidas');
         }
 
-        // Generar token (por ahora un token simple, se implementará JWT en la siguiente task)
-        const token = `temp_token_${user.id}`;
+        // Generar tokens JWT
+        const tokens = JWTService.generateTokenPair({
+            id: user.id,
+            email: user.email,
+            rol: user.rol
+        });
 
         return {
             user: {
@@ -84,7 +93,7 @@ class AuthService {
                 email: user.email,
                 rol: user.rol
             },
-            token
+            tokens
         };
     }
 
@@ -94,6 +103,10 @@ class AuthService {
             throw new Error('Usuario no encontrado');
         }
         return user;
+    }
+
+    async refreshTokens(refreshToken: string) {
+        return JWTService.refreshTokens(refreshToken);
     }
 }
 

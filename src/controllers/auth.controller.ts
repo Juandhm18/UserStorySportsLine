@@ -99,6 +99,32 @@ class AuthController {
             });
         }
     }
+
+    async refreshToken(req: Request, res: Response) {
+        try {
+            const { refreshToken } = req.body;
+
+            if (!refreshToken) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Refresh token es requerido'
+                });
+            }
+
+            const tokens = await AuthService.refreshTokens(refreshToken);
+
+            res.status(200).json({
+                success: true,
+                message: 'Tokens renovados exitosamente',
+                data: tokens
+            });
+        } catch (error: any) {
+            res.status(401).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 }
 
 export default new AuthController();
