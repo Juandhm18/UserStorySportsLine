@@ -1,22 +1,17 @@
 import express from 'express';
 import sequelize from './config/database';
-import { specs, swaggerUi } from './config/swagger';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
 import clientRoutes from './routes/client.routes';
 import orderRoutes from './routes/order.routes';
 
+// Importar asociaciones después de configurar Sequelize
+import './models/associations';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'SportsLine API Documentation'
-}));
 
 // Rutas
 app.use('/api/auth', authRoutes);

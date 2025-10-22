@@ -3,19 +3,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME as string,
-    process.env.DB_USER as string,
-    process.env.DB_PASSWORD as string,
-    {
-        host: process.env.DB_HOST!,
-        port: Number(process.env.DB_PORT),
-        dialect: 'postgres',
-        logging: false,
-    }
-);
+// Configuración de PostgreSQL usando URI de conexión
+const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
+    dialect: 'postgres',
+    logging: false,
+});
 
-// Importar asociaciones
-import '../models/associations';
+console.log('Configurado para PostgreSQL con Supabase');
 
-export default sequelize
+export default sequelize;

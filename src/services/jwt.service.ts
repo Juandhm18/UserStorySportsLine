@@ -19,11 +19,11 @@ export interface TokenPair {
 
 class JWTService {
     generateAccessToken(payload: TokenPayload): string {
-        return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+        return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as any);
     }
 
     generateRefreshToken(payload: TokenPayload): string {
-        return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+        return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN } as any);
     }
 
     generateTokenPair(payload: TokenPayload): TokenPair {
@@ -61,9 +61,9 @@ class JWTService {
 
         // Generar nuevos tokens
         const newPayload: TokenPayload = {
-            id: user.id,
-            email: user.email,
-            rol: user.rol
+            id: (user as any).id,
+            email: (user as any).email,
+            rol: (user as any).rol
         };
 
         return this.generateTokenPair(newPayload);

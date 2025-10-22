@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import AuthService from '../services/auth.service';
-import EncryptionService from '../services/encryption.service';
 import { RegisterDTOType, LoginDTOType } from '../dto/auth.dto';
+import { ResponseUtil } from '../utils/response.util';
+import { MESSAGES } from '../constants/messages';
 
 class AuthController {
     async register(req: Request, res: Response) {
@@ -9,16 +10,9 @@ class AuthController {
             const data: RegisterDTOType = req.body;
             const result = await AuthService.register(data);
 
-            res.status(201).json({
-                success: true,
-                message: 'Usuario registrado exitosamente',
-                data: result
-            });
+            ResponseUtil.created(res, MESSAGES.SUCCESS.USER_REGISTERED, result);
         } catch (error: any) {
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+            ResponseUtil.error(res, error.message, 400);
         }
     }
 
@@ -27,16 +21,9 @@ class AuthController {
             const data: LoginDTOType = req.body;
             const result = await AuthService.login(data);
 
-            res.status(200).json({
-                success: true,
-                message: 'Inicio de sesión exitoso',
-                data: result
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.LOGIN_SUCCESS, result);
         } catch (error: any) {
-            res.status(401).json({
-                success: false,
-                message: error.message
-            });
+            ResponseUtil.unauthorized(res, error.message);
         }
     }
 
@@ -45,28 +32,19 @@ class AuthController {
             const userId = (req as any).user?.id;
             
             if (!userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Token no válido'
-                });
+                return ResponseUtil.unauthorized(res, 'Token no válido');
             }
 
             const user = await AuthService.getUserById(userId);
 
-            res.status(200).json({
-                success: true,
-                data: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    rol: user.rol
-                }
+            ResponseUtil.success(res, MESSAGES.SUCCESS.PROFILE_RETRIEVED, {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                rol: user.rol
             });
         } catch (error: any) {
-            res.status(404).json({
-                success: false,
-                message: error.message
-            });
+            ResponseUtil.notFound(res, error.message);
         }
     }
 
@@ -75,61 +53,14 @@ class AuthController {
             const { refreshToken } = req.body;
 
             if (!refreshToken) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Refresh token es requerido'
-                });
+                return ResponseUtil.error(res, MESSAGES.ERROR.REFRESH_TOKEN_REQUIRED, 400);
             }
 
-            const tokens = await AuthService.refreshTokens(refreshToken);
+            const result = await AuthService.refreshTokens(refreshToken);
 
-            res.status(200).json({
-                success: true,
-                message: 'Tokens renovados exitosamente',
-                data: tokens
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.TOKENS_REFRESHED, result);
         } catch (error: any) {
-            res.status(401).json({
-                success: false,
-                message: error.message
-            });
-        }
-    }
-
-    async testEncryption(req: Request, res: Response) {
-        try {
-            const { message } = req.body;
-
-            if (!message) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Mensaje requerido para la prueba de cifrado'
-                });
-            }
-
-            // Cifrar mensaje
-            const encrypted = EncryptionService.encryptHybrid(message);
-            
-            // Descifrar mensaje
-            const decrypted = EncryptionService.decryptHybrid(encrypted);
-
-            res.status(200).json({
-                success: true,
-                message: 'Prueba de cifrado híbrido exitosa',
-                data: {
-                    originalMessage: message,
-                    encryptedData: encrypted.encryptedData,
-                    encryptedKey: encrypted.encryptedKey,
-                    iv: encrypted.iv,
-                    decryptedMessage: decrypted.decryptedData,
-                    encryptionWorking: message === decrypted.decryptedData
-                }
-            });
-        } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error en la prueba de cifrado: ' + error.message
-            });
+            ResponseUtil.unauthorized(res, error.message);
         }
     }
 }

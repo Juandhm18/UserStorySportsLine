@@ -27,9 +27,9 @@ class AuthService {
 
         // Generar tokens JWT
         const tokens = JWTService.generateTokenPair({
-            id: user.id,
-            email: user.email,
-            rol: user.rol
+            id: (user as any).id,
+            email: (user as any).email,
+            rol: (user as any).rol
         });
 
         return {
@@ -48,16 +48,16 @@ class AuthService {
         }
 
         // Verificar contraseña
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        const isValidPassword = await bcrypt.compare(password, (user as any).password);
         if (!isValidPassword) {
             throw new Error('Credenciales inválidas');
         }
 
         // Generar tokens JWT
         const tokens = JWTService.generateTokenPair({
-            id: user.id,
-            email: user.email,
-            rol: user.rol
+            id: (user as any).id,
+            email: (user as any).email,
+            rol: (user as any).rol
         });
 
         return {

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import OrderService from '../services/order.service';
-import EncryptionService from '../services/encryption.service';
 import { CreateOrderDTOType, UpdateOrderDTOType, OrderParamsDTOType, OrderQueryDTOType } from '../dto/order.dto';
+import { ResponseUtil } from '../utils/response.util';
+import { MESSAGES } from '../constants/messages';
 
 class OrderController {
     async create(req: Request, res: Response) {
@@ -11,44 +12,31 @@ class OrderController {
             // Agregar el userId del usuario autenticado
             const userId = (req as any).user?.id;
             if (!userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Usuario no autenticado'
-                });
+                return ResponseUtil.unauthorized(res, 'Usuario no autenticado');
             }
 
             const orderWithUser = {
                 ...orderData,
                 userId
-            };
+            } as any;
 
             const order = await OrderService.create(orderWithUser);
 
-            res.status(201).json({
-                success: true,
-                message: 'Pedido creado exitosamente',
-                data: order
-            });
+            ResponseUtil.created(res, MESSAGES.SUCCESS.ORDER_CREATED, order);
         } catch (error: any) {
             if (error.message.includes('Stock insuficiente') || 
                 error.message.includes('no encontrado') ||
                 error.message.includes('Debe incluir')) {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
+                return ResponseUtil.error(res, error.message, 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al crear pedido: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al crear pedido: ${error.message}`);
         }
     }
 
     async getAll(req: Request, res: Response) {
         try {
-            const queryParams = req.query as unknown as OrderQueryDTOType;
+            const queryParams = req.query as any;
             const orders = await OrderService.getAll(queryParams);
             
             res.status(200).json({
@@ -92,7 +80,7 @@ class OrderController {
     async update(req: Request, res: Response) {
         try {
             const { id } = req.params as unknown as OrderParamsDTOType;
-            const orderData: UpdateOrderDTOType = req.body;
+            const orderData: any = req.body;
             
             const order = await OrderService.update(id, orderData);
 
@@ -301,9 +289,9 @@ class OrderController {
             }
 
             const queryParams = {
-                ...req.query as unknown as OrderQueryDTOType,
+                ...req.query as any,
                 userId
-            };
+            } as any;
             
             const orders = await OrderService.getAll(queryParams);
             
@@ -391,43 +379,6 @@ class OrderController {
             }))
             .sort((a, b) => b.totalQuantity - a.totalQuantity)
             .slice(0, 10);
-    }
-
-    async testOrderEncryption(req: Request, res: Response) {
-        try {
-            const { sensitiveData } = req.body;
-
-            if (!sensitiveData) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Datos sensibles requeridos para la prueba de cifrado'
-                });
-            }
-
-            // Cifrar datos sensibles
-            const encrypted = EncryptionService.encryptHybrid(sensitiveData);
-            
-            // Descifrar datos sensibles
-            const decrypted = EncryptionService.decryptHybrid(encrypted);
-
-            res.status(200).json({
-                success: true,
-                message: 'Prueba de cifrado híbrido en pedidos exitosa',
-                data: {
-                    originalData: sensitiveData,
-                    encryptedData: encrypted.encryptedData,
-                    encryptedKey: encrypted.encryptedKey,
-                    iv: encrypted.iv,
-                    decryptedData: decrypted.decryptedData,
-                    encryptionWorking: sensitiveData === decrypted.decryptedData
-                }
-            });
-        } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error en la prueba de cifrado de pedidos: ' + error.message
-            });
-        }
     }
 }
 
