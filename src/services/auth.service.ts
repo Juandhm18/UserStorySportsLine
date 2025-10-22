@@ -1,35 +1,14 @@
 import bcrypt from 'bcrypt';
-import User from '../models/user.model';
 import JWTService, { TokenPair } from './jwt.service';
-
-export interface RegisterData {
-    name: string;
-    email: string;
-    password: string;
-    rol: 'admin' | 'vendedor';
-}
-
-export interface LoginData {
-    email: string;
-    password: string;
-}
-
-export interface AuthResponse {
-    user: {
-        id: number;
-        name: string;
-        email: string;
-        rol: string;
-    };
-    tokens: TokenPair;
-}
+import UserDAO from '../dao/user.dao';
+import { RegisterDTOType, LoginDTOType, AuthResponseDTO } from '../dto/auth.dto';
 
 class AuthService {
-    async register(data: RegisterData): Promise<AuthResponse> {
+    async register(data: RegisterDTOType): Promise<AuthResponseDTO> {
         const { name, email, password, rol } = data;
 
-        // Verificar si el usuario ya existe
-        const existingUser = await User.findOne({ where: { email } });
+        // Verificar si el usuario ya existe usando el DAO
+        const existingUser = await UserDAO.findByEmail(email);
         if (existingUser) {
             throw new Error('El usuario ya existe con este email');
         }
@@ -38,8 +17,8 @@ class AuthService {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Crear usuario
-        const user = await User.create({
+        // Crear usuario usando el DAO
+        const user = await UserDAO.create({
             name,
             email,
             password: hashedPassword,
@@ -54,21 +33,16 @@ class AuthService {
         });
 
         return {
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                rol: user.rol
-            },
+            user: UserDAO.toResponseDTO(user),
             tokens
         };
     }
 
-    async login(data: LoginData): Promise<AuthResponse> {
+    async login(data: LoginDTOType): Promise<AuthResponseDTO> {
         const { email, password } = data;
 
-        // Buscar usuario
-        const user = await User.findOne({ where: { email } });
+        // Buscar usuario usando el DAO
+        const user = await UserDAO.findByEmail(email);
         if (!user) {
             throw new Error('Credenciales inválidas');
         }
@@ -87,22 +61,17 @@ class AuthService {
         });
 
         return {
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                rol: user.rol
-            },
+            user: UserDAO.toResponseDTO(user),
             tokens
         };
     }
 
     async getUserById(id: number) {
-        const user = await User.findByPk(id);
+        const user = await UserDAO.findById(id);
         if (!user) {
             throw new Error('Usuario no encontrado');
         }
-        return user;
+        return UserDAO.toResponseDTO(user);
     }
 
     async refreshTokens(refreshToken: string) {

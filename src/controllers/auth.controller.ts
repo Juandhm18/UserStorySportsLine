@@ -1,34 +1,12 @@
 import { Request, Response } from 'express';
-import AuthService, { RegisterData, LoginData } from '../services/auth.service';
+import AuthService from '../services/auth.service';
+import { RegisterDTOType, LoginDTOType } from '../dto/auth.dto';
 
 class AuthController {
     async register(req: Request, res: Response) {
         try {
-            const { name, email, password, rol }: RegisterData = req.body;
-
-            // Validaciones básicas
-            if (!name || !email || !password || !rol) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Todos los campos son requeridos'
-                });
-            }
-
-            if (!['admin', 'vendedor'].includes(rol)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El rol debe ser admin o vendedor'
-                });
-            }
-
-            if (password.length < 6) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'La contraseña debe tener al menos 6 caracteres'
-                });
-            }
-
-            const result = await AuthService.register({ name, email, password, rol });
+            const data: RegisterDTOType = req.body;
+            const result = await AuthService.register(data);
 
             res.status(201).json({
                 success: true,
@@ -45,17 +23,8 @@ class AuthController {
 
     async login(req: Request, res: Response) {
         try {
-            const { email, password }: LoginData = req.body;
-
-            // Validaciones básicas
-            if (!email || !password) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email y contraseña son requeridos'
-                });
-            }
-
-            const result = await AuthService.login({ email, password });
+            const data: LoginDTOType = req.body;
+            const result = await AuthService.login(data);
 
             res.status(200).json({
                 success: true,
