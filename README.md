@@ -18,3 +18,12 @@ npm install --save-dev typescript ts-node-dev @types/express @types/node @types/
 ### 1.3. We initialize typescript
 
 npx tsc --init
+
+### 1.4 Create database
+
+psql -U postgres
+
+CREATE DATABASE sportsline_db;
+\l
+
+\q
