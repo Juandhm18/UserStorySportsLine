@@ -23,8 +23,9 @@ User.init({
         allowNull: false
     },
     rol: {
-        type: DataTypes.STRING,
-        defaultValue: 'user'
+        type: DataTypes.ENUM('admin', 'vendedor'),
+        defaultValue: 'vendedor',
+        allowNull: false
     },
 },{
     sequelize,
