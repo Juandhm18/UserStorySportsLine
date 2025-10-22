@@ -1,22 +1,17 @@
 import { Request, Response } from 'express';
 import ClientService from '../services/client.service';
 import { CreateClientDTOType, UpdateClientDTOType, ClientParamsDTOType, ClientQueryDTOType } from '../dto/client.dto';
+import { ResponseUtil } from '../utils/response.util';
+import { MESSAGES } from '../constants/messages';
 
 class ClientController {
     async getAll(req: Request, res: Response) {
         try {
             const clients = await ClientService.getAll();
             
-            res.status(200).json({
-                success: true,
-                message: 'Clientes obtenidos exitosamente',
-                data: clients
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.CLIENTS_RETRIEVED, clients);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener clientes: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al obtener clientes: ${error.message}`);
         }
     }
 
@@ -26,22 +21,12 @@ class ClientController {
             const client = await ClientService.getById(id);
 
             if (!client) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Cliente no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.CLIENT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Cliente obtenido exitosamente',
-                data: client
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.CLIENT_RETRIEVED, client);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener cliente: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al obtener cliente: ${error.message}`);
         }
     }
 
@@ -50,23 +35,13 @@ class ClientController {
             const clientData = req.body as CreateClientDTOType;
             const client = await ClientService.create(clientData);
 
-            res.status(201).json({
-                success: true,
-                message: 'Cliente creado exitosamente',
-                data: client
-            });
+            ResponseUtil.created(res, MESSAGES.SUCCESS.CLIENT_CREATED, client);
         } catch (error: any) {
             if (error.message.includes('email único') || error.message.includes('documento único')) {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
+                return ResponseUtil.error(res, error.message, 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al crear cliente: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al crear cliente: ${error.message}`);
         }
     }
 
@@ -78,29 +53,16 @@ class ClientController {
             const client = await ClientService.update(id, clientData);
 
             if (!client) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Cliente no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.CLIENT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Cliente actualizado exitosamente',
-                data: client
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.CLIENT_UPDATED, client);
         } catch (error: any) {
             if (error.message.includes('email único') || error.message.includes('documento único')) {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
+                return ResponseUtil.error(res, error.message, 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al actualizar cliente: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al actualizar cliente: ${error.message}`);
         }
     }
 
@@ -110,21 +72,12 @@ class ClientController {
             const deleted = await ClientService.delete(id);
 
             if (!deleted) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Cliente no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.CLIENT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Cliente eliminado exitosamente'
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.CLIENT_DELETED);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al eliminar cliente: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al eliminar cliente: ${error.message}`);
         }
     }
 }

@@ -1,22 +1,17 @@
 import { Request, Response } from 'express';
 import ProductService from '../services/product.service';
 import { CreateProductDTOType, UpdateProductDTOType, ProductParamsDTOType, ProductQueryDTOType } from '../dto/product.dto';
+import { ResponseUtil } from '../utils/response.util';
+import { MESSAGES } from '../constants/messages';
 
 class ProductController {
     async getAll(req: Request, res: Response) {
         try {
             const products = await ProductService.getAll();
             
-            res.status(200).json({
-                success: true,
-                message: 'Productos obtenidos exitosamente',
-                data: products
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.PRODUCTS_RETRIEVED, products);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener productos: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al obtener productos: ${error.message}`);
         }
     }
 
@@ -26,22 +21,12 @@ class ProductController {
             const product = await ProductService.getById(id);
 
             if (!product) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Producto no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.PRODUCT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Producto obtenido exitosamente',
-                data: product
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.PRODUCT_RETRIEVED, product);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al obtener producto: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al obtener producto: ${error.message}`);
         }
     }
 
@@ -50,23 +35,13 @@ class ProductController {
             const productData: CreateProductDTOType = req.body;
             const product = await ProductService.create(productData);
 
-            res.status(201).json({
-                success: true,
-                message: 'Producto creado exitosamente',
-                data: product
-            });
+            ResponseUtil.created(res, MESSAGES.SUCCESS.PRODUCT_CREATED, product);
         } catch (error: any) {
             if (error.message.includes('código único')) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El código del producto ya existe'
-                });
+                return ResponseUtil.error(res, 'El código del producto ya existe', 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al crear producto: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al crear producto: ${error.message}`);
         }
     }
 
@@ -78,29 +53,16 @@ class ProductController {
             const product = await ProductService.update(id, productData);
 
             if (!product) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Producto no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.PRODUCT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Producto actualizado exitosamente',
-                data: product
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.PRODUCT_UPDATED, product);
         } catch (error: any) {
             if (error.message.includes('código único')) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El código del producto ya existe'
-                });
+                return ResponseUtil.error(res, 'El código del producto ya existe', 400);
             }
 
-            res.status(500).json({
-                success: false,
-                message: 'Error al actualizar producto: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al actualizar producto: ${error.message}`);
         }
     }
 
@@ -110,21 +72,12 @@ class ProductController {
             const deleted = await ProductService.delete(id);
 
             if (!deleted) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Producto no encontrado'
-                });
+                return ResponseUtil.notFound(res, MESSAGES.ERROR.PRODUCT_NOT_FOUND);
             }
 
-            res.status(200).json({
-                success: true,
-                message: 'Producto eliminado exitosamente'
-            });
+            ResponseUtil.success(res, MESSAGES.SUCCESS.PRODUCT_DELETED);
         } catch (error: any) {
-            res.status(500).json({
-                success: false,
-                message: 'Error al eliminar producto: ' + error.message
-            });
+            ResponseUtil.internalError(res, `Error al eliminar producto: ${error.message}`);
         }
     }
 }

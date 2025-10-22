@@ -1,6 +1,5 @@
 import express from 'express';
 import sequelize from './config/database';
-import { specs, swaggerUi } from './config/swagger';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
 import clientRoutes from './routes/client.routes';
@@ -10,13 +9,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'SportsLine API Documentation'
-}));
 
 // Rutas
 app.use('/api/auth', authRoutes);
