@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import OrderService from '../services/order.service';
+import EncryptionService from '../services/encryption.service';
 import { CreateOrderDTOType, UpdateOrderDTOType, OrderParamsDTOType, OrderQueryDTOType } from '../dto/order.dto';
 
 class OrderController {
@@ -390,6 +391,43 @@ class OrderController {
             }))
             .sort((a, b) => b.totalQuantity - a.totalQuantity)
             .slice(0, 10);
+    }
+
+    async testOrderEncryption(req: Request, res: Response) {
+        try {
+            const { sensitiveData } = req.body;
+
+            if (!sensitiveData) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Datos sensibles requeridos para la prueba de cifrado'
+                });
+            }
+
+            // Cifrar datos sensibles
+            const encrypted = EncryptionService.encryptHybrid(sensitiveData);
+            
+            // Descifrar datos sensibles
+            const decrypted = EncryptionService.decryptHybrid(encrypted);
+
+            res.status(200).json({
+                success: true,
+                message: 'Prueba de cifrado híbrido en pedidos exitosa',
+                data: {
+                    originalData: sensitiveData,
+                    encryptedData: encrypted.encryptedData,
+                    encryptedKey: encrypted.encryptedKey,
+                    iv: encrypted.iv,
+                    decryptedData: decrypted.decryptedData,
+                    encryptionWorking: sensitiveData === decrypted.decryptedData
+                }
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: 'Error en la prueba de cifrado de pedidos: ' + error.message
+            });
+        }
     }
 }
 

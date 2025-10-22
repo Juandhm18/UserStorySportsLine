@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import EncryptionService from '../services/encryption.service';
 
 // Campos sensibles que deben ser cifrados
-const SENSITIVE_FIELDS = ['password', 'email', 'phone', 'address', 'creditCard'];
+const SENSITIVE_FIELDS = ['password', 'email', 'phone', 'address', 'creditCard', 'notes', 'document'];
 
 // Middleware para cifrar datos sensibles en las respuestas
 export const encryptResponse = (req: Request, res: Response, next: NextFunction) => {
