@@ -3,17 +3,17 @@ import Client from '../models/client.model';
 export interface CreateClientData {
     name: string;
     email: string;
-    phone?: string;
-    address?: string;
+    phone?: string | undefined;
+    address?: string | undefined;
     document: string;
 }
 
 export interface UpdateClientData {
-    name?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    document?: string;
+    name?: string | undefined;
+    email?: string | undefined;
+    phone?: string | undefined;
+    address?: string | undefined;
+    document?: string | undefined;
 }
 
 export interface ClientResponse {

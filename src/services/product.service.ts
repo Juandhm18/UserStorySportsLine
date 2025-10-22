@@ -8,10 +8,10 @@ export interface CreateProductData {
 }
 
 export interface UpdateProductData {
-    code?: string;
-    name?: string;
-    price?: number;
-    stock?: number;
+    code?: string | undefined;
+    name?: string | undefined;
+    price?: number | undefined;
+    stock?: number | undefined;
 }
 
 export interface ProductResponse {

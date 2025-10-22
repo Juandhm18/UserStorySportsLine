@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import ClientService from '../services/client.service';
+import { CreateClientDTOType, UpdateClientDTOType, ClientParamsDTOType, ClientQueryDTOType } from '../dto/client.dto';
 
 class ClientController {
     async getAll(req: Request, res: Response) {
@@ -21,8 +22,8 @@ class ClientController {
 
     async getById(req: Request, res: Response) {
         try {
-            const { id } = req.params;
-            const client = await ClientService.getById(parseInt(id!));
+            const { id } = req.params as unknown as ClientParamsDTOType;
+            const client = await ClientService.getById(id);
 
             if (!client) {
                 return res.status(404).json({
@@ -46,7 +47,7 @@ class ClientController {
 
     async create(req: Request, res: Response) {
         try {
-            const clientData = req.body;
+            const clientData = req.body as CreateClientDTOType;
             const client = await ClientService.create(clientData);
 
             res.status(201).json({
@@ -71,10 +72,10 @@ class ClientController {
 
     async update(req: Request, res: Response) {
         try {
-            const { id } = req.params;
-            const clientData = req.body;
+            const { id } = req.params as unknown as ClientParamsDTOType;
+            const clientData = req.body as UpdateClientDTOType;
             
-            const client = await ClientService.update(parseInt(id!), clientData);
+            const client = await ClientService.update(id, clientData);
 
             if (!client) {
                 return res.status(404).json({
@@ -105,8 +106,8 @@ class ClientController {
 
     async delete(req: Request, res: Response) {
         try {
-            const { id } = req.params;
-            const deleted = await ClientService.delete(parseInt(id!));
+            const { id } = req.params as unknown as ClientParamsDTOType;
+            const deleted = await ClientService.delete(id);
 
             if (!deleted) {
                 return res.status(404).json({
