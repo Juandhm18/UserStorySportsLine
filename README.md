@@ -27,3 +27,10 @@ CREATE DATABASE sportsline_db;
 \l
 
 \q
+
+## Scripts
+```bash
+npm run dev    # desarrollo
+npm run build  # compilar
+npm run start  # producción
+npm run seed   # poblar datos iniciales
