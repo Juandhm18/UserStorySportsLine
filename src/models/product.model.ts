@@ -3,6 +3,7 @@ import sequelize from '../config/database';
 
 class Product extends Model {
   public id!: number;
+  public code!: string;
   public name!: string;
   public price!: number;
   public stock!: number;
@@ -14,6 +15,11 @@ Product.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    code: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
