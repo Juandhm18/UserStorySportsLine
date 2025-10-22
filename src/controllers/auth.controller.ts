@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import AuthService from '../services/auth.service';
+import EncryptionService from '../services/encryption.service';
 import { RegisterDTOType, LoginDTOType } from '../dto/auth.dto';
 
 class AuthController {
@@ -91,6 +92,43 @@ class AuthController {
             res.status(401).json({
                 success: false,
                 message: error.message
+            });
+        }
+    }
+
+    async testEncryption(req: Request, res: Response) {
+        try {
+            const { message } = req.body;
+
+            if (!message) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Mensaje requerido para la prueba de cifrado'
+                });
+            }
+
+            // Cifrar mensaje
+            const encrypted = EncryptionService.encryptHybrid(message);
+            
+            // Descifrar mensaje
+            const decrypted = EncryptionService.decryptHybrid(encrypted);
+
+            res.status(200).json({
+                success: true,
+                message: 'Prueba de cifrado híbrido exitosa',
+                data: {
+                    originalMessage: message,
+                    encryptedData: encrypted.encryptedData,
+                    encryptedKey: encrypted.encryptedKey,
+                    iv: encrypted.iv,
+                    decryptedMessage: decrypted.decryptedData,
+                    encryptionWorking: message === decrypted.decryptedData
+                }
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: 'Error en la prueba de cifrado: ' + error.message
             });
         }
     }
