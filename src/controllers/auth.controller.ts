@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import AuthService from '../services/auth.service';
-import EncryptionService from '../services/encryption.service';
 import { RegisterDTOType, LoginDTOType } from '../dto/auth.dto';
 import { ResponseUtil } from '../utils/response.util';
 import { MESSAGES } from '../constants/messages';
@@ -62,33 +61,6 @@ class AuthController {
             ResponseUtil.success(res, MESSAGES.SUCCESS.TOKENS_REFRESHED, result);
         } catch (error: any) {
             ResponseUtil.unauthorized(res, error.message);
-        }
-    }
-
-    async testEncryption(req: Request, res: Response) {
-        try {
-            const { message } = req.body;
-
-            if (!message) {
-                return ResponseUtil.error(res, 'Mensaje requerido para la prueba de cifrado', 400);
-            }
-
-            // Cifrar mensaje
-            const encrypted = EncryptionService.encryptHybrid(message);
-            
-            // Descifrar mensaje
-            const decrypted = EncryptionService.decryptHybrid(encrypted);
-
-            ResponseUtil.success(res, 'Prueba de cifrado híbrido exitosa', {
-                originalMessage: message,
-                encryptedData: encrypted.encryptedData,
-                encryptedKey: encrypted.encryptedKey,
-                iv: encrypted.iv,
-                decryptedMessage: decrypted.decryptedData,
-                encryptionWorking: message === decrypted.decryptedData
-            });
-        } catch (error: any) {
-            ResponseUtil.internalError(res, `Error en la prueba de cifrado: ${error.message}`);
         }
     }
 }

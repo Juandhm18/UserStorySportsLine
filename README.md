@@ -12,7 +12,6 @@ Una API REST robusta y escalable para la gestión de productos, clientes y pedid
 - [Uso](#uso)
 - [API Endpoints](#api-endpoints)
 - [Autenticación](#autenticación)
-- [Cifrado](#cifrado)
 - [Pruebas](#pruebas)
 - [Docker](#docker)
 - [Estructura del Proyecto](#estructura-del-proyecto)
@@ -22,7 +21,6 @@ Una API REST robusta y escalable para la gestión de productos, clientes y pedid
 ## Características
 
 - **Autenticación JWT** con refresh tokens
-- **Cifrado híbrido** (AES-256-GCM + RSA) para datos sensibles
 - **CRUD completo** para productos, clientes y pedidos
 - **Autorización basada en roles** (admin, vendedor)
 - **Validación robusta** con Zod
@@ -43,8 +41,6 @@ Una API REST robusta y escalable para la gestión de productos, clientes y pedid
 ### Seguridad
 - **JWT** - Autenticación y autorización
 - **bcrypt** - Hash de contraseñas
-- **AES-256-GCM** - Cifrado simétrico
-- **RSA** - Cifrado asimétrico
 
 ### Desarrollo
 - **Jest** - Framework de pruebas
@@ -153,10 +149,6 @@ JWT_REFRESH_EXPIRES_IN=7d
 # Servidor
 PORT=3000
 NODE_ENV=development
-
-# Cifrado RSA (opcional - se generan automáticamente)
-RSA_PUBLIC_KEY=tu_clave_publica_rsa
-RSA_PRIVATE_KEY=tu_clave_privada_rsa
 ```
 
 ## Uso
@@ -244,25 +236,6 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```bash
 curl -X GET http://localhost:3000/api/products \
   -H "Authorization: Bearer tu_access_token"
-```
-
-## Cifrado
-
-El sistema implementa cifrado híbrido para datos sensibles:
-
-- **AES-256-GCM**: Para cifrar los datos
-- **RSA-2048**: Para cifrar las claves AES
-- **bcrypt**: Para hashear contraseñas
-
-### Ejemplo de Cifrado
-```typescript
-import EncryptionService from './services/encryption.service';
-
-// Cifrar datos
-const encrypted = EncryptionService.encryptHybrid('datos sensibles');
-
-// Descifrar datos
-const decrypted = EncryptionService.decryptHybrid(encrypted);
 ```
 
 ## Pruebas

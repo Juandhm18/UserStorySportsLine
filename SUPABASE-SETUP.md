@@ -24,7 +24,7 @@ DATABASE_URL=postgresql://postgres:tu-contraseña@db.tu-proyecto.supabase.co:543
 npm run dev
 ```
 
-## ✅ Verificación
+##  Verificación
 
 Deberías ver:
 ```
@@ -33,19 +33,19 @@ Conexion a la base de datos exitosa
 Modelos sincronizados con la base de datos
 ```
 
-## 🔧 Ejemplo de URI
+##  Ejemplo de URI
 
 ```env
 DATABASE_URL=postgresql://postgres:abcdefghijklmnop@db.abcdefghijklmnop.supabase.co:5432/postgres
 ```
 
-## ⚠️ Importante
+##  Importante
 
 - **Reemplaza** `[YOUR-PASSWORD]` con tu contraseña real
 - **Reemplaza** `[YOUR-PROJECT-REF]` con tu referencia de proyecto
 - **No compartas** tu URI de conexión públicamente
 
-## 🆘 Si tienes problemas
+## Si tienes problemas
 
 1. **Error de conexión:** Verifica que la URI sea correcta
 2. **Proyecto no encontrado:** Asegúrate de que el proyecto esté activo en Supabase
