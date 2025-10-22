@@ -101,51 +101,18 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 ```
 
-4. **Configurar la base de datos PostgreSQL**
+4. **Configurar Supabase PostgreSQL**
 
-**Opción A: PostgreSQL en la Nube (Recomendado)**
 ```bash
-# 1. Crear cuenta gratuita en https://neon.tech
+# 1. Crear cuenta gratuita en https://supabase.com
 # 2. Crear un nuevo proyecto
-# 3. Copiar las credenciales de conexión
-# 4. Actualizar .env con tus credenciales:
-DB_HOST=tu-host.neon.tech
-DB_PORT=5432
-DB_NAME=tu-db-name
-DB_USER=tu-usuario
-DB_PASSWORD=tu-contraseña
+# 3. Ir a Settings → Database
+# 4. Copiar la Connection string (URI)
+# 5. Actualizar .env con tu URI:
+DATABASE_URL=postgresql://postgres:tu-contraseña@db.tu-proyecto.supabase.co:5432/postgres
 ```
 
-**Opción B: PostgreSQL Local**
-```bash
-# Instalar PostgreSQL (requiere permisos de administrador)
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-
-# Crear base de datos y usuario
-sudo -u postgres psql
-CREATE DATABASE sportsline_db;
-CREATE USER postgres WITH PASSWORD 'postgres';
-GRANT ALL PRIVILEGES ON DATABASE sportsline_db TO postgres;
-\q
-
-# Configurar .env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=sportsline_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-```
-
-**Opción C: Docker**
-```bash
-# Solo la base de datos PostgreSQL
-docker-compose up -d db
-```
-
-Para más detalles, consulta `POSTGRESQL-CONFIG.md`.
+Para más detalles, consulta `SUPABASE-SETUP.md`.
 
 5. **Iniciar el servidor**
 ```bash
@@ -174,12 +141,8 @@ docker-compose up -d postgres
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-# Base de datos PostgreSQL
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=sportsline_db
-DB_USER=postgres
-DB_PASSWORD=tu_password
+# Supabase PostgreSQL URI
+DATABASE_URL=postgresql://postgres:tu-contraseña@db.tu-proyecto.supabase.co:5432/postgres
 
 # JWT
 JWT_SECRET=tu_jwt_secret_super_seguro
