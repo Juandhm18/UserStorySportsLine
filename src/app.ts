@@ -5,6 +5,9 @@ import productRoutes from './routes/product.routes';
 import clientRoutes from './routes/client.routes';
 import orderRoutes from './routes/order.routes';
 
+// Importar asociaciones después de configurar Sequelize
+import './models/associations';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

@@ -430,7 +430,7 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más det
 
 ## Autores
 
-- **Juan David Hernández** - *Desarrollo inicial* - [@Juandhm18](https://github.com/Juandhm18)
+- **Juan Hernández** - *Desarrollo inicial* - [@Juandhm18](https://github.com/Juandhm18)
 
 ## Agradecimientos
 
