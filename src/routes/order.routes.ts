@@ -16,6 +16,9 @@ router.delete('/:id', verifyToken, requireAdminOrVendedor, validateParams(OrderP
 // Rutas específicas para gestión de pedidos
 router.get('/client/:clientId', verifyToken, requireAdminOrVendedor, OrderController.getOrdersByClient);
 router.get('/product/:productId', verifyToken, requireAdminOrVendedor, OrderController.getOrdersByProduct);
+router.get('/status/:status', verifyToken, requireAdminOrVendedor, OrderController.getOrdersByStatus);
+router.get('/history/my-orders', verifyToken, requireAdminOrVendedor, validateQuery(OrderQueryDTO), OrderController.getOrderHistory);
+router.get('/statistics', verifyToken, requireAdminOrVendedor, OrderController.getOrderStatistics);
 
 // Rutas para cambio de estado de pedidos
 router.patch('/:id/cancel', verifyToken, requireAdminOrVendedor, validateParams(OrderParamsDTO), OrderController.cancelOrder);

@@ -270,6 +270,127 @@ class OrderController {
             });
         }
     }
+
+    async getOrdersByStatus(req: Request, res: Response) {
+        try {
+            const { status } = req.params;
+            const orders = await OrderService.getOrdersByStatus(status!);
+            
+            res.status(200).json({
+                success: true,
+                message: `Pedidos con estado ${status} obtenidos exitosamente`,
+                data: orders
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener pedidos por estado: ' + error.message
+            });
+        }
+    }
+
+    async getOrderHistory(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+            }
+
+            const queryParams = {
+                ...req.query as unknown as OrderQueryDTOType,
+                userId
+            };
+            
+            const orders = await OrderService.getAll(queryParams);
+            
+            res.status(200).json({
+                success: true,
+                message: 'Historial de pedidos obtenido exitosamente',
+                data: orders
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener historial de pedidos: ' + error.message
+            });
+        }
+    }
+
+    async getOrderStatistics(req: Request, res: Response) {
+        try {
+            const { status } = req.query;
+            
+            let orders;
+            if (status) {
+                orders = await OrderService.getOrdersByStatus(status as string);
+            } else {
+                const allOrders = await OrderService.getAll({ limit: 1000 });
+                orders = allOrders.orders;
+            }
+
+            // Calcular estadísticas
+            const totalOrders = orders.length;
+            const totalValue = orders.reduce((sum, order) => sum + order.total, 0);
+            const averageOrderValue = totalOrders > 0 ? totalValue / totalOrders : 0;
+            
+            const statusCounts = orders.reduce((acc, order) => {
+                acc[order.status] = (acc[order.status] || 0) + 1;
+                return acc;
+            }, {} as Record<string, number>);
+
+            const statistics = {
+                totalOrders,
+                totalValue,
+                averageOrderValue: Math.round(averageOrderValue * 100) / 100,
+                statusCounts,
+                topProducts: this.calculateTopProducts(orders)
+            };
+
+            res.status(200).json({
+                success: true,
+                message: 'Estadísticas de pedidos obtenidas exitosamente',
+                data: statistics
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener estadísticas: ' + error.message
+            });
+        }
+    }
+
+    private calculateTopProducts(orders: any[]): Array<{ productId: number; productName: string; totalQuantity: number; totalValue: number }> {
+        const productStats = new Map<number, { name: string; quantity: number; value: number }>();
+
+        orders.forEach(order => {
+            order.items.forEach((item: any) => {
+                const existing = productStats.get(item.productId);
+                if (existing) {
+                    existing.quantity += item.quantity;
+                    existing.value += item.subtotal;
+                } else {
+                    productStats.set(item.productId, {
+                        name: item.product.name,
+                        quantity: item.quantity,
+                        value: item.subtotal
+                    });
+                }
+            });
+        });
+
+        return Array.from(productStats.entries())
+            .map(([productId, stats]) => ({
+                productId,
+                productName: stats.name,
+                totalQuantity: stats.quantity,
+                totalValue: stats.value
+            }))
+            .sort((a, b) => b.totalQuantity - a.totalQuantity)
+            .slice(0, 10);
+    }
 }
 
 export default new OrderController();
